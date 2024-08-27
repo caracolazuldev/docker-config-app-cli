@@ -21,4 +21,4 @@ services:
     volumes:
       - .:/go/src/app
     entrypoint: ["go", "build"]
-    command: ["-o", "/go/src/app/app", "/go/src/app/add-config.go"]
+    command: ["-o", "/go/src/app/dist/${APP_NAME:-add-config}", "/go/src/app/${APP_NAME:-add-config}.go"]
