@@ -1,12 +1,12 @@
 # Roadmap
 
+## ~~Port Awk script: add-config.awk~~
+
+Port legacy script to golang stand-alone executable, that generates or updates a configuration template file.
+
 ## Hello World
 
 scaffold out a cli plugin.
-
-## Port Awk script: add-config.awk
-
-Port legacy script to golang, that generates or updates a configuration tempalte file.
 
 ## Port Awk script: interactive-config.awk
 
