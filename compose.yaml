@@ -1,11 +1,11 @@
 services:
 
-  configure:
-    image: caracolazuldev/interactive-configure
+  config-app:
+    image: caracolazuldev/docker-config-app
     build:
       context: .
     volumes:
-      - ./conf:/app/conf
+      - .:/go/src/app
 
   go-run:
     image: golang
@@ -13,6 +13,7 @@ services:
     tty: true
     volumes:
       - .:/go/src/app
+    working_dir: /go/src/app
 
   go-build:
     image: golang
