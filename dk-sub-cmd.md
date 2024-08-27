@@ -81,7 +81,10 @@ The Docker CLI's pluggable sub-command architecture allows developers to extend 
 * https://docs.docker.com/desktop/extensions-sdk/
 * https://docs.docker.com/extensions/extensions-sdk/architecture/
 * https://github.com/docker/cli/blob/master/docs/extend/plugin_api.md
-https://docs.docker.com/extensions/extensions-sdk/build/backend-extension-tutorial/
+* https://docs.docker.com/extensions/extensions-sdk/build/backend-extension-tutorial/
+* https://forums.docker.com/
+* https://www.docker.com/blog/developing-go-apps-docker/
+
 
 
 **Sketch:**
