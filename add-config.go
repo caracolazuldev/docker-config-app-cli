@@ -23,10 +23,10 @@ func main() {
 	if err != nil {
 		if err == io.EOF {
 			fmt.Println("\nExiting the CLI. Goodbye!")
-			break
+			return
 		}
 		fmt.Println("Error reading input:", err)
-		continue
+		return
 	}
 	filename = strings.TrimSpace(filename)
 
