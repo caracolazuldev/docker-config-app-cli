@@ -71,8 +71,21 @@ The process of creating a custom sub-command for the Docker CLI involves the fol
 
 The Docker CLI's pluggable sub-command architecture allows developers to extend the functionality of the Docker CLI to meet their specific needs, without modifying the core Docker codebase. This makes it easier to integrate Docker with other tools and services, and to create custom workflows and automation scripts.
 
-**example plugins:** 
+**References:**
 
 * [base-cli-plugin](https://github.com/docker/base-cli-plugin)
 * [example plugin helloworld](https://github.com/docker/cli/tree/master/cli-plugins/examples)
+* https://github.com/docker/buildx/blob/master/cmd/buildx/main.go
+* [go-plugins-helpers](https://github.com/docker/go-plugins-helpers)
+* https://www.docker.com/blog/build-your-first-docker-extension/
+* https://docs.docker.com/desktop/extensions-sdk/
+* https://docs.docker.com/extensions/extensions-sdk/architecture/
+* https://github.com/docker/cli/blob/master/docs/extend/plugin_api.md
+https://docs.docker.com/extensions/extensions-sdk/build/backend-extension-tutorial/
 
+
+**Sketch:**
+
+There are engine-plugins, and CLI-plugins. Engine plugins are for extending the Docker Engine, while CLI plugins are for extending the Docker CLI. CLI plugins are standalone executables that are invoked by the Docker CLI to perform specific tasks. They can be used to add new sub-commands, customize the behavior of existing commands, or integrate with external tools and services.
+
+A docker extension extends Docker Desktop. An extension can consist of a Frontend, a Backend, and executibles. The cli plugin can be packaged as an executible of the extension. The Frontend can then call the plugin through the extension SDK. https://docs.docker.com/extensions/extensions-sdk/dev/api/backend/#invoke-an-extension-binary-on-the-host
