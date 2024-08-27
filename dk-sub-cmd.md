@@ -76,7 +76,6 @@ The Docker CLI's pluggable sub-command architecture allows developers to extend 
 * [base-cli-plugin](https://github.com/docker/base-cli-plugin)
 * [example plugin helloworld](https://github.com/docker/cli/tree/master/cli-plugins/examples)
 * https://github.com/docker/buildx/blob/master/cmd/buildx/main.go
-* [go-plugins-helpers](https://github.com/docker/go-plugins-helpers)
 * https://www.docker.com/blog/build-your-first-docker-extension/
 * https://docs.docker.com/desktop/extensions-sdk/
 * https://docs.docker.com/extensions/extensions-sdk/architecture/
@@ -84,6 +83,8 @@ The Docker CLI's pluggable sub-command architecture allows developers to extend 
 * https://docs.docker.com/extensions/extensions-sdk/build/backend-extension-tutorial/
 * https://forums.docker.com/
 * https://www.docker.com/blog/developing-go-apps-docker/
+* https://github.com/docker/scout-cli
+* https://github.com/docker/scout-cli/blob/main/install.sh
 
 
 
