@@ -1,0 +1,24 @@
+services:
+
+  configure:
+    image: caracolazuldev/interactive-configure
+    build:
+      context: .
+    volumes:
+      - ./conf:/app/conf
+
+  go-run:
+    image: golang
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/go/src/app
+
+  go-build:
+    image: golang
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/go/src/app
+    entrypoint: ["go", "build"]
+    command: ["-o", "/go/src/app/app", "/go/src/app/add-config.go"]
