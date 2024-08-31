@@ -1,25 +1,44 @@
 services:
 
-  config-app:
+  app-image:
+    profiles:
+      - ad-hoc
     image: caracolazuldev/docker-config-app
     build:
       context: .
+      dockerfile: docker/config-app/Dockerfile
     volumes:
       - .:/go/src/app
 
-  go-run:
-    image: golang
-    stdin_open: true
-    tty: true
-    volumes:
-      - .:/go/src/app
-    working_dir: /go/src/app
+  go-image:
+    profiles:
+      - ad-hoc
+    image: caracolazuldev/go-dev
+    build:
+      context: docker/go-dev
 
-  go-build:
-    image: golang
-    stdin_open: true
-    tty: true
+  # app:
+  #   image: caracolazuldev/go-dev
+  #   stdin_open: true
+  #   tty: true
+  #   volumes:
+  #     - .:/go/src/app
+  #   working_dir: /go/src/app
+
+  go:
+    image: caracolazuldev/go-dev
+    user: go
     volumes:
-      - .:/go/src/app
-    entrypoint: ["go", "build"]
-    command: ["-o", "/go/src/app/dist/${APP_NAME:-add-config}", "/go/src/app/${APP_NAME:-add-config}.go"]
+      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
+    working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
+    entrypoint: ["go"]
+    command: ["build", "-C", "/go/src/app/${APP_NAME:-docker-config-app-cli}"]
+
+  go-shell:
+    image: caracolazuldev/go-dev
+    user: go
+    volumes:
+      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
+    working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
+    entrypoint: ["/bin/bash"]
+    command: []
