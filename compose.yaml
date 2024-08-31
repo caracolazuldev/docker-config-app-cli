@@ -29,16 +29,32 @@ services:
     image: caracolazuldev/go-dev
     user: go
     volumes:
+      - go-modules:/go/pkg
       - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
     working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
-    entrypoint: ["go"]
-    command: ["build", "-C", "/go/src/app/${APP_NAME:-docker-config-app-cli}"]
 
-  go-shell:
+  shell:
     image: caracolazuldev/go-dev
+    profiles:
+      - ad-hoc
     user: go
     volumes:
+      - go-modules:/go/pkg
       - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
     working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
-    entrypoint: ["/bin/bash"]
-    command: []
+    entrypoint: ["/bin/sh"]
+
+  playground:
+    image: x1unix/go-playground:latest
+    restart: unless-stopped
+    profiles:
+      - ad-hoc
+    ports:
+      - 8000:8000
+    environment:
+      APP_CLEAN_INTERVAL: '30m'
+    volumes:
+      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
+
+volumes:
+  go-modules:
