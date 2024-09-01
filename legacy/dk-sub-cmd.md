@@ -85,6 +85,7 @@ The Docker CLI's pluggable sub-command architecture allows developers to extend 
 * https://www.docker.com/blog/developing-go-apps-docker/
 * https://github.com/docker/scout-cli
 * https://github.com/docker/scout-cli/blob/main/install.sh
+* https://cli.urfave.org/v2/getting-started/
 
 
 
