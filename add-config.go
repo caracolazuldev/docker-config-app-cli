@@ -2,30 +2,59 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/urfave/cli/v2"
 )
 
-func main() {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Add config to a file. Type Ctrl+D to quit.")
+func configFile(stdin *bufio.Reader) (string, error) {
 
-	fmt.Print("\nFile-name? ")
-	filename, err := reader.ReadString('\n')
-	OnError("Error reading input: %v\n", err)
-
-	filename = strings.TrimSpace(filename)
-
-	if filename == "" {
-		return
+	fmt.Println("Create a config file template, or add configs to one.")
+	fmt.Print("File-name? ")
+	filename, err := stdin.ReadString('\n')
+	if err != nil {
+		if errors.Is(err,io.EOF){
+			fmt.Println("\nExiting. Goodbye!")
+			return "", nil
+		}
+		fmt.Errorf("could not read input: %v\n", err)
+		return "", err
 	}
 
-	// Remove .conf or .tpl suffix if present
-	re := regexp.MustCompile(`\.conf$|\.tpl$`)
+	filename = strings.TrimSpace(filename)
+	if filename == "" {
+		return "", fmt.Errorf("filename is required")
+	}
+
+	// Remove .tpl suffix if present
+	re := regexp.MustCompile(`\.tpl$`)
 	filename = re.ReplaceAllString(filename, "")
+	// if no suffix, add .conf
+	if !strings.Contains(filename, ".") {
+		filename += ".conf"
+	}
 	filename += ".tpl"
+
+	return filename, nil
+}
+
+func addConfig(ctx *cli.Context) error {
+
+	fmt.Println("Hello, I am the add-config tool.")
+	fmt.Println("[Type Ctrl+D when done]\n")
+
+	reader := bufio.NewReader(os.Stdin)
+	filename, err := configFile(reader);
+
+	if err != nil {
+        return cli.Exit(err, 1)
+    }
 
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	OnError("Error opening file: %v\n", err)
@@ -36,9 +65,8 @@ func main() {
 		name, err := reader.ReadString('\n')
 		OnError("Error reading config name: %v\n", err)
 		name = strings.TrimSpace(name)
-
 		if name == "" {
-			return
+			return cli.Exit("Must provide a config name.", 1)
 		}
 
 		fmt.Print("Help text? ")
@@ -62,4 +90,21 @@ func main() {
 
 		fmt.Printf("%s%s ?= {{%s}}# %s >> %s\n", prefix, name, name, help, filename)
 	}
+
+	return nil
+}
+
+func main() {
+	app := &cli.App{
+		Name:  "add-config",
+		// Flags: []cli.BoolFlag{
+		// 	Name: "-q"
+		// 	Usage: "quiet mode",
+		// },
+		Action: addConfig,
+	}
+
+	if err := app.Run(os.Args); err != nil {
+        log.Fatal(err)
+    }
 }
