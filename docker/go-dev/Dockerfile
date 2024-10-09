@@ -27,8 +27,8 @@ ENTRYPOINT [ "go" ]
 #     user: go
 #     volumes:
 #       - go-modules:/go/pkg
-#       - .:/go/src/app/${APP_NAME:-my-app}
-#     working_dir: /go/src/app/${APP_NAME:-my-app}
+#       - .:/go/src/${APP_NAME:-my-app}
+#     working_dir: /go/src/${APP_NAME:-my-app}
 #
 # volumes:
 # 	go-modules:

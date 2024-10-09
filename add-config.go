@@ -13,18 +13,35 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func configFile(stdin *bufio.Reader) (string, error) {
-
-	fmt.Println("Create a config file template, or add configs to one.")
-	fmt.Print("File-name? ")
-	filename, err := stdin.ReadString('\n')
+// File I/O
+func createOrAppendFile(filename string, content string) error {
+	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		if errors.Is(err,io.EOF){
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(content)
+	return err
+}
+
+// User Input
+func readUserInput(prompt string) (string, error) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(prompt)
+	return reader.ReadString('\n')
+}
+
+
+func configFile() (string, error) {
+	fmt.Println("Create a config file template, or add configs to one.")
+	filename, err := readUserInput("File-name? ")
+	if err != nil {
+		if errors.Is(err, io.EOF) {
 			fmt.Println("\nExiting. Goodbye!")
 			return "", nil
 		}
-		fmt.Errorf("could not read input: %v\n", err)
-		return "", err
+		return "", fmt.Errorf("could not read input: %v", err)
 	}
 
 	filename = strings.TrimSpace(filename)
@@ -45,38 +62,34 @@ func configFile(stdin *bufio.Reader) (string, error) {
 }
 
 func addConfig(ctx *cli.Context) error {
-
 	fmt.Println("Hello, I am the add-config tool.")
 	fmt.Println("[Type Ctrl+D when done]\n")
 
-	reader := bufio.NewReader(os.Stdin)
-	filename, err := configFile(reader);
-
+	filename, err := configFile()
 	if err != nil {
-        return cli.Exit(err, 1)
-    }
-
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	OnError("Error opening file: %v\n", err)
-	defer file.Close()
+		return cli.Exit(err, 1)
+	}
 
 	for {
-		fmt.Print("\nConfig Name? ")
-		name, err := reader.ReadString('\n')
-		OnError("Error reading config name: %v\n", err)
+		name, err := readUserInput("\nConfig Name? ")
+		if err != nil {
+			return cli.Exit(fmt.Errorf("error reading config name: %v", err), 1)
+		}
 		name = strings.TrimSpace(name)
 		if name == "" {
 			return cli.Exit("Must provide a config name.", 1)
 		}
 
-		fmt.Print("Help text? ")
-		help, err := reader.ReadString('\n')
-		OnError("Error reading help text: %v\n", err)
+		help, err := readUserInput("Help text? ")
+		if err != nil {
+			return cli.Exit(fmt.Errorf("error reading help text: %v", err), 1)
+		}
 		help = strings.TrimSpace(help)
 
-		fmt.Print("export? [yes] ")
-		noExp, err := reader.ReadString('\n')
-		OnError("Error reading export option: %v\n", err)
+		noExp, err := readUserInput("export? [yes] ")
+		if err != nil {
+			return cli.Exit(fmt.Errorf("error reading export option: %v", err), 1)
+		}
 		noExp = strings.TrimSpace(noExp)
 
 		prefix := ""
@@ -85,13 +98,12 @@ func addConfig(ctx *cli.Context) error {
 		}
 
 		line := fmt.Sprintf("%s%s ?= {{%s}}# %s\n", prefix, name, name, help)
-		_, err = file.WriteString(line)
-		OnError("Error writing to file: %v\n", err)
+		if err := createOrAppendFile(filename, line); err != nil {
+			return cli.Exit(fmt.Errorf("error writing to file: %v", err), 1)
+		}
 
 		fmt.Printf("%s%s ?= {{%s}}# %s >> %s\n", prefix, name, name, help, filename)
 	}
-
-	return nil
 }
 
 func main() {

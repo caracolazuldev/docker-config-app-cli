@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: docker/config-app/Dockerfile
     volumes:
-      - .:/go/src/app
+      - .:/go/src/${APP_NAME:-docker-config-app-cli}
 
   go-image:
     profiles:
@@ -29,9 +29,9 @@ services:
     image: caracolazuldev/go-dev
     user: go
     volumes:
-      - go-modules:/go/pkg
-      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
-    working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
+      - go-wksp:/go
+      - .:/go/src/app
+    working_dir: /go/src/app
 
   shell:
     image: caracolazuldev/go-dev
@@ -39,10 +39,10 @@ services:
       - ad-hoc
     user: go
     volumes:
-      - go-modules:/go/pkg
-      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
-    working_dir: /go/src/app/${APP_NAME:-docker-config-app-cli}
-    entrypoint: ["/bin/sh"]
+      - go-wksp:/go
+      - .:/go/src/${APP_NAME:-docker-config-app-cli}
+    working_dir: /go/src/${APP_NAME:-docker-config-app-cli}
+    entrypoint: ["/bin/bash"]
 
   playground:
     image: x1unix/go-playground:latest
@@ -54,7 +54,7 @@ services:
     environment:
       APP_CLEAN_INTERVAL: '30m'
     volumes:
-      - .:/go/src/app/${APP_NAME:-docker-config-app-cli}
+      - .:/go/src/${APP_NAME:-docker-config-app-cli}
 
 volumes:
-  go-modules:
+  go-wksp:
