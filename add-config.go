@@ -13,25 +13,12 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// File I/O
-func createOrAppendFile(filename string, content string) error {
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(content)
-	return err
-}
-
 // User Input
 func readUserInput(prompt string) (string, error) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(prompt)
 	return reader.ReadString('\n')
 }
-
 
 func configFile() (string, error) {
 	fmt.Println("Create a config file template, or add configs to one.")
@@ -98,7 +85,8 @@ func addConfig(ctx *cli.Context) error {
 		}
 
 		line := fmt.Sprintf("%s%s ?= {{%s}}# %s\n", prefix, name, name, help)
-		if err := createOrAppendFile(filename, line); err != nil {
+		var f = &File{}
+		if err := f.createOrAppendFile(filename, line); err != nil {
 			return cli.Exit(fmt.Errorf("error writing to file: %v", err), 1)
 		}
 
@@ -108,7 +96,7 @@ func addConfig(ctx *cli.Context) error {
 
 func main() {
 	app := &cli.App{
-		Name:  "add-config",
+		Name: "add-config",
 		// Flags: []cli.BoolFlag{
 		// 	Name: "-q"
 		// 	Usage: "quiet mode",
@@ -117,6 +105,6 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-        log.Fatal(err)
-    }
+		log.Fatal(err)
+	}
 }
