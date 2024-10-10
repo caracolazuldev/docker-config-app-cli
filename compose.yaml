@@ -40,8 +40,8 @@ services:
     user: go
     volumes:
       - go-wksp:/go
-      - .:/go/src/${APP_NAME:-docker-config-app-cli}
-    working_dir: /go/src/${APP_NAME:-docker-config-app-cli}
+      - .:/go/src/app
+    working_dir: /go/src/app
     entrypoint: ["/bin/bash"]
 
   playground:
