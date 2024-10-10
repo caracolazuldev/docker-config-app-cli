@@ -33,6 +33,17 @@ services:
       - .:/go/src/app
     working_dir: /go/src/app
 
+  dev:
+    image: caracolazuldev/go-dev
+    user: go
+    volumes:
+      - go-wksp:/go
+      - .:/go/src/app
+    working_dir: /go/src/app
+    entrypoint: ["/bin/bash"]
+    # keep the container running
+    command: ["-c", "while true; do sleep 30; done"]
+
   shell:
     image: caracolazuldev/go-dev
     profiles:
