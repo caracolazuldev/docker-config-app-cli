@@ -1,34 +1,27 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"os"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/urfave/cli/v2"
 )
 
-// User Input
-func readUserInput(prompt string) (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(prompt)
-	return reader.ReadString('\n')
-}
-
 func configFile() (string, error) {
-	fmt.Println("Create a config file template, or add configs to one.")
-	filename, err := readUserInput("File-name? ")
+	var user = services.Term
+
+	user.PrintLn("Create a config file template, or add configs to one.\n")
+
+	filename, err := user.ReadLn("File-name? ")
 	if err != nil {
 		if errors.Is(err, io.EOF) {
-			fmt.Println("\nExiting. Goodbye!")
-			return "", nil
+			return "", err
 		}
-		return "", fmt.Errorf("could not read input: %v", err)
+		panic(fmt.Sprintf("Could not read input: %v", err))
 	}
 
 	filename = strings.TrimSpace(filename)
@@ -48,63 +41,82 @@ func configFile() (string, error) {
 	return filename, nil
 }
 
+func promptForConfig() (string, string, string, error) {
+	var user = services.Term
+
+	// overly complex, but I'm just learning to use maps and slices
+
+	type prompt struct {
+		Order  int
+		Name   string
+		Prompt string
+	}
+	prompts := []prompt{
+		{0, "name", "Config Name?"},
+		{1, "help", "Help text?"},
+		{2, "noExp", "export? [no]"},
+	}
+
+	sort.Slice(prompts, func(i, j int) bool {
+		return prompts[i].Order < prompts[j].Order
+	})
+
+	results := make(map[string]string)
+
+	for _, prompt := range prompts {
+		input, err := user.ReadLn(prompt.Prompt + " ")
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				err = fmt.Errorf("error reading %s: %v", prompt.Prompt, err)
+			}
+			return "", "", "", err
+		}
+		input = strings.TrimSpace(input)
+		if prompt.Name == "name" && input == "" {
+			return "", "", "", errors.New("must provide a config name")
+		}
+		results[prompt.Name] = input
+	}
+
+	if results["noExp"] != "" &&
+		!strings.HasPrefix(strings.ToLower(results["noExp"]), "n") {
+		results["noExp"] = "export "
+	}
+
+	return results["noExp"], results["name"], results["help"], nil
+}
+
+/**
+ * Main()
+ */
 func addConfig(ctx *cli.Context) error {
-	fmt.Println("Hello, I am the add-config tool.")
-	fmt.Println("[Type Ctrl+D when done]\n")
+
+	var term = services.Term
+
+	term.PrintLn("Hello, I am the add-config tool.")
+	term.PrintLn("[Type Ctrl+D when done]\n")
 
 	filename, err := configFile()
 	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return cli.Exit("\nExiting. Goodbye!", 0)
+		}
 		return cli.Exit(err, 1)
 	}
 
 	for {
-		name, err := readUserInput("\nConfig Name? ")
-		if err != nil {
-			return cli.Exit(fmt.Errorf("error reading config name: %v", err), 1)
-		}
-		name = strings.TrimSpace(name)
-		if name == "" {
-			return cli.Exit("Must provide a config name.", 1)
-		}
+		prefix, name, help, err := promptForConfig()
 
-		help, err := readUserInput("Help text? ")
 		if err != nil {
-			return cli.Exit(fmt.Errorf("error reading help text: %v", err), 1)
-		}
-		help = strings.TrimSpace(help)
-
-		noExp, err := readUserInput("export? [yes] ")
-		if err != nil {
-			return cli.Exit(fmt.Errorf("error reading export option: %v", err), 1)
-		}
-		noExp = strings.TrimSpace(noExp)
-
-		prefix := ""
-		if noExp != "" {
-			prefix = "export "
+			return cli.Exit(err, 1)
 		}
 
 		line := fmt.Sprintf("%s%s ?= {{%s}}# %s\n", prefix, name, name, help)
-		var f = &File{}
-		if err := f.createOrAppendFile(filename, line); err != nil {
+
+		if err := services.Files.createOrAppendFile(filename, line); err != nil {
 			return cli.Exit(fmt.Errorf("error writing to file: %v", err), 1)
 		}
 
 		fmt.Printf("%s%s ?= {{%s}}# %s >> %s\n", prefix, name, name, help, filename)
-	}
-}
-
-func main() {
-	app := &cli.App{
-		Name: "add-config",
-		// Flags: []cli.BoolFlag{
-		// 	Name: "-q"
-		// 	Usage: "quiet mode",
-		// },
-		Action: addConfig,
-	}
-
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
 	}
 }
