@@ -26,6 +26,8 @@ services:
   #   working_dir: /go/src/app
 
   go:
+    profiles:
+      - ad-hoc
     image: caracolazuldev/go-dev
     user: go
     volumes:
@@ -45,11 +47,29 @@ services:
     command: ["-c", "while true; do sleep 30; done"]
 
   mockery:
+    profiles:
+      - ad-hoc
     image: vektra/mockery:v2
     volumes:
       - go-wksp:/go
       - .:/go/src/app
     working_dir: /go/src/app
+
+#  coming soon: requires Docker Compose 2.22.0
+# (un-tested)
+# requiers passing --watch to `docker compose up`
+  # watch:
+  #   image: caracolazuldev/go-dev
+  #   user: go
+  #   volumes:
+  #     - go-wksp:/go
+  #   working_dir: /go/src/app
+  #   command: ["build"]
+  #   develop:
+  #     watch:
+  #       - action: sync+restart
+  #         path: .
+  #         target: /go/src/app
 
   shell:
     image: caracolazuldev/go-dev
